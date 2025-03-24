@@ -1,0 +1,19 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "description": "Extra utilities and packages for typebox",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["typebox", "typebox-extra"],
+  "author": "Michael Lazuardy",
+  "license": "ISC",
+  "packageManager": "pnpm@10.6.2",
+  "pnpm": {
+    "neverBuiltDependencies": []
+  },
+  "devDependencies": {
+    "nx": "^20.6.2",
+    "nx-cloud": "^19.1.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@typeb/core",
+  "description": "Core package for typebox-extra",
+  "license": "MIT",
+  "version": "0.1.0",
+  "scripts": {},
+  "peerDependencies": {
+    "@sinclair/typebox": "^0.34.31"
+  },
+  "devDependencies": {
+    "@sinclair/typebox": "^0.34.31",
+    "typescript": "^5.8.2",
+    "tsup": "^8.4.0"
+  }
+}
