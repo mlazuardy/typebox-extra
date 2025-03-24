@@ -3,8 +3,16 @@
   "description": "Core package for typebox-extra",
   "license": "MIT",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mlazuardy/typebox-extra"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "@sinclair/typebox": "^0.34.31"
