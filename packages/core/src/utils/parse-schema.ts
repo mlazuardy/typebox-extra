@@ -1,5 +1,5 @@
 import { TSchema } from "@sinclair/typebox";
-import { TypeCheck } from "../typesystem";
+import { TypeCheck } from "../type-system";
 import { Value } from "@sinclair/typebox/value";
 
 /**
