@@ -4,10 +4,9 @@ export default defineConfig((options) => ({
   entry: ["src/index.ts"],
   dts: true,
   outDir: "dist",
-  clean: !options.watch,
+  clean: true,
   format: ["cjs", "esm"],
   treeshake: true,
   cjsInterop: true,
   splitting: false,
-  sourcemap: options.watch === true,
 }));
