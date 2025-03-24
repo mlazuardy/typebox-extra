@@ -1,0 +1,12 @@
+{
+  "extends": "@typeb/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "ESNext",
+    "target": "ES2022",
+    "noImplicitAny": false,
+    "resolveJsonModule": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist"],
+}

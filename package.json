@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Extra utilities and packages for typebox",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "nx run-many --target=build --no-cloud"
   },
   "keywords": ["typebox", "typebox-extra"],
   "author": "Michael Lazuardy",
