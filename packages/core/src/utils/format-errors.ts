@@ -20,8 +20,12 @@ export const ERROR_TYPE_KEYS = {
   [ValueErrorType.StringFormat]: "format",
 };
 
-export function getFieldPath(path: string) {
+export function pathToDot(path: string) {
   return path.replace(/^\//, "").replace(/\//g, ".");
+}
+
+function getLastPath(path: string) {
+  return path.split("/").slice(-1)[0];
 }
 
 /**
@@ -30,14 +34,20 @@ export function getFieldPath(path: string) {
  */
 
 export function getLabel(
-  labelOptions: string | Record<string, string>,
-  fallback: string,
+  path: string,
+  labelOptions?: string | Record<string, string>,
   locale = "en",
 ) {
-  const label =
-    typeof labelOptions === "string"
-      ? labelOptions
-      : labelOptions[locale] || fallback;
+  let label = path;
+  if (!labelOptions) {
+    label = getLastPath(path);
+  } else {
+    label =
+      typeof labelOptions === "string"
+        ? labelOptions
+        : labelOptions[locale] || getLastPath(path);
+  }
+
   return label.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
 }
 
@@ -87,16 +97,12 @@ export function formatErrors(
 
     if (!pathExist) {
       const messageField = getMessageField({
+        locale,
         message: error.message,
         errorMessage: error.schema.errorMessage,
-        locale,
         type: error.type,
       });
-      const label = getLabel(
-        error.schema.label || getFieldPath(error.path),
-        getFieldPath(error.path),
-        locale,
-      );
+      const label = getLabel(error.path, error.schema.label, locale);
       acc.push({
         ...error,
         message: parseErrorMessage(messageField, {

@@ -6,7 +6,6 @@ import {
 } from "@sinclair/typebox/errors";
 import {
   ERROR_TYPE_KEYS,
-  getFieldPath,
   getLabel,
   getProperty,
   parseErrorMessage,
@@ -16,15 +15,25 @@ import { Kind } from "@sinclair/typebox";
 interface SetupOptions {
   messages: Record<string, any>;
   defaultLocale?: string;
+  fallbackLocale?: string;
 }
 
 export class ErrorInstance {
   static isLoad = false;
   private static locale: string = "en";
-  static messages: Record<string, any> = {};
+  private static fallbackLocale: string = "en";
+  private static messages: Record<string, any> = {};
 
   static setLocale(locale: string) {
     this.locale = locale;
+  }
+
+  static get localeMessage() {
+    return this.messages[this.locale] || this.messages[this.fallbackLocale];
+  }
+
+  static reset() {
+    SetErrorFunction(DefaultErrorFunction);
   }
 
   /**
@@ -37,24 +46,22 @@ export class ErrorInstance {
   }
 
   private static getErrorKey(error: ErrorFunctionParameter, type: string) {
-    const localeMessage = this.messages[this.locale];
-
     if (!error.schema.type) {
       const kind = error.schema[Kind]?.toLowerCase();
       // get every possible error message path
       // can be live within root message, standard, or format
       // the sequence of precedence is root -> standard
       return (
-        getProperty(localeMessage, kind) ||
-        getProperty(localeMessage, `standard.${kind}`)
+        getProperty(this.localeMessage, kind) ||
+        getProperty(this.localeMessage, `standard.${kind}`)
       );
     }
 
     if (error.schema.type === "string" && error.schema.format) {
-      return getProperty(localeMessage, `format.${error.schema.format}`);
+      return getProperty(this.localeMessage, `format.${error.schema.format}`);
     }
 
-    return getProperty(localeMessage, `${error.schema.type}.${type}`);
+    return getProperty(this.localeMessage, `${error.schema.type}.${type}`);
   }
 
   static setup(options: SetupOptions) {
@@ -62,27 +69,24 @@ export class ErrorInstance {
     this.messages = options.messages;
 
     if (!this.isLoad) {
-      SetErrorFunction((error) => {
-        const label = getLabel(
-          error.schema.label || getFieldPath(error.path),
-          getFieldPath(error.path),
-          this.locale,
-        );
+      const localeMessage = this.localeMessage;
 
-        const localeMessage = this.messages[this.locale];
+      if (!localeMessage) {
+        throw new Error("Locale message not found");
+      }
+
+      SetErrorFunction((error) => {
+        const label = getLabel(error.path, error.schema.label, this.locale);
+        const type = ERROR_TYPE_KEYS[error.errorType];
+
         const variables = {
-          label,
           ...error.schema,
+          label,
         };
-        if (!localeMessage) {
-          return this.getFallbackMessage(error);
-        }
 
         if (error.errorType === ValueErrorType.ObjectRequiredProperty) {
           return parseErrorMessage(localeMessage.required, variables);
         }
-
-        const type = ERROR_TYPE_KEYS[error.errorType];
 
         if (!type) {
           return this.getFallbackMessage(error);
