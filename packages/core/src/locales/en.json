@@ -19,5 +19,5 @@
   "format": {
     "email": "{{label}} must be a valid email address."
   },
-  "union": "{{label}} must be one of the allowed values."
+  "union": "{{label}} is invalid."
 }

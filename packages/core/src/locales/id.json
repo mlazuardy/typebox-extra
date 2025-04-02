@@ -19,5 +19,5 @@
   "format": {
     "email": "{{label}} harus berupa email yang valid."
   },
-  "union": "{{label}} harus berupa salah satu nilai yang diizinkan."
+  "union": "{{label}} tidak valid."
 }
