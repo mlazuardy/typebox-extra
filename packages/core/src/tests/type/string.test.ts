@@ -1,49 +1,138 @@
 import { Value } from "@sinclair/typebox/value";
-import { describe, expect, test } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { t } from "../../type-system";
 import { ErrorStorage } from "../../error-storage";
 import en from "../../locales/en.json";
 import id from "../../locales/id.json";
 
-describe("string", () => {
-  test("should be custom message", () => {
-    ErrorStorage.setup({
-      messages: { en, id },
-      defaultLocale: "en",
-    });
+ErrorStorage.load({
+  messages: { en, id },
+  defaultLocale: "en",
+});
 
-    const schema = t.Object({
-      name: t.String({ minLength: 1 }),
-    });
+describe("string default locale", () => {
+  const schema = t.Object({
+    firstName: t.String({
+      minLength: 3,
+      errorMessage: {
+        required: "{{label}} cannot be empty",
+      },
+    }),
+    lastName: t.String({
+      minLength: 3,
+      label: {
+        id: "nama belakang",
+      },
+    }),
+    company: t.String({
+      minLength: 3,
+      label: {
+        en: "Organization",
+      },
+    }),
+  });
 
-    const errors = Array.from(Value.Errors(schema, { name: "" }));
+  const errors = Array.from(Value.Errors(schema, {}));
 
+  it("errorMessage should take precedence", () => {
     expect(errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          message: expect.stringContaining("must be at least"),
+          message: expect.stringContaining("cannot be empty"),
         }),
       ]),
     );
   });
 
-  test("should return errorMessage", () => {
-    const schema = t.Object({
-      name: t.String({
-        minLength: 1,
-        errorMessage: {
-          required: "{{label}} cannot be empty",
+  it("non-defined error type inside errorMessage should fallback to default localization message", () => {
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining("must be a string"),
+        }),
+      ]),
+    );
+  });
+
+  it("label should be used", () => {
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining("organization"),
+        }),
+      ]),
+    );
+  });
+
+  it("mismatch locale label should use schema path", () => {
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining("last name"),
+        }),
+      ]),
+    );
+  });
+});
+
+describe("string set locale", () => {
+  ErrorStorage.setLocale("id");
+  const schema = t.Object({
+    firstName: t.String({
+      minLength: 3,
+      label: {
+        id: "nama depan",
+      },
+      errorMessage: {
+        invalid: {
+          id: "nama depan tidak valid",
         },
-      }),
-    });
+      },
+    }),
+    lastName: t.String({
+      minLength: 3,
+      label: {
+        id: "nama belakang",
+      },
+      errorMessage: {
+        invalid: {
+          en: "last name is invalid",
+        },
+      },
+    }),
+  });
 
-    const errors = Array.from(Value.Errors(schema, { name: "" }));
+  const errors = Array.from(Value.Errors(schema, {}));
+
+  it("label should be used", () => {
     expect(errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          message: "cannot be empty",
+          message: expect.stringContaining("nama"),
         }),
       ]),
     );
   });
+
+  it("inline localize message should be used", () => {
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining("nama depan tidak valid"),
+        }),
+      ]),
+    );
+  });
+
+  it("invalid inline localize message should fallback to locale message", () => {
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining("nama belakang harus berupa string"),
+        }),
+      ]),
+    );
+  });
+
+  afterAll(() => ErrorStorage.setLocale("en"));
 });
