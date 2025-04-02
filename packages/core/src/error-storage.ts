@@ -5,7 +5,7 @@ import {
   ValueErrorType,
 } from "@sinclair/typebox/errors";
 import { Kind } from "@sinclair/typebox";
-import { getProperty } from "../utils";
+import { getProperty } from "./utils";
 
 interface SetupOptions {
   messages: Record<string, any>;
@@ -25,7 +25,7 @@ export const ERROR_TYPE_KEYS = {
   [ValueErrorType.StringFormat]: "format",
 };
 
-export class ErrorInstance {
+export class ErrorStorage {
   static isLoad = false;
   private static locale: string = "en";
   private static fallbackLocale: string = "en";

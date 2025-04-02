@@ -1,13 +1,13 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, test } from "vitest";
 import { t } from "../../type-system";
-import { ErrorInstance } from "../../errors";
+import { ErrorStorage } from "../../error-storage";
 import en from "../../locales/en.json";
 import id from "../../locales/id.json";
 
 describe("string", () => {
   test("should be custom message", () => {
-    ErrorInstance.setup({
+    ErrorStorage.setup({
       messages: { en, id },
       defaultLocale: "en",
     });
