@@ -18,7 +18,7 @@ declare module "@sinclair/typebox" {
     Email: typeof TypeEmail;
   }
   interface SchemaOptions {
-    label?: string | Record<string, any>;
+    label?: string | Record<string, string>;
     errorMessage?: ErrorMessageSchemaOptions;
   }
 }

@@ -1,5 +1,3 @@
 import { beforeAll } from "vitest";
 
-beforeAll(() => {
-  //
-});
+beforeAll(() => {});

@@ -1,37 +1,110 @@
 import { ValueError, ValueErrorType } from "@sinclair/typebox/errors";
-import { ErrorMessage } from "../types";
+import { ErrorMessageSchemaOptions, FormatErrorOptions } from "../types";
 
-const ERROR_TYPE_KEYS = {
-  [ValueErrorType.StringMinLength]: "minLength",
-  [ValueErrorType.StringMaxLength]: "maxLength",
-  [ValueErrorType.Union]: "union",
-};
-
-export function formatErrorMessage(error: ValueError) {
-  const messageKey = ERROR_TYPE_KEYS[error.type];
-  if (!messageKey || !error.schema.errorMessage) {
-    return error.message;
-  }
-
-  const message = error.schema.errorMessage[messageKey];
-
-  return message || error.message;
+interface MessageFieldOptions {
+  message: string;
+  errorMessage?: ErrorMessageSchemaOptions;
+  locale?: string;
+  type: ValueErrorType;
 }
 
-export function formatErrors(errors: ValueError[]) {
+export const ERROR_TYPE_KEYS = {
+  [ValueErrorType.ObjectRequiredProperty]: "required",
+  [ValueErrorType.String]: "invalid",
+  [ValueErrorType.StringMinLength]: "minLength",
+  [ValueErrorType.StringMaxLength]: "maxLength",
+  [ValueErrorType.Union]: "invalid",
+  [ValueErrorType.Array]: "invalid",
+  [ValueErrorType.ArrayMinItems]: "minItems",
+  [ValueErrorType.ArrayMaxItems]: "maxItems",
+  [ValueErrorType.StringFormat]: "format",
+};
+
+export function getFieldPath(path: string) {
+  return path.replace(/^\//, "").replace(/\//g, ".");
+}
+
+/**
+ * Create function to beautify label format
+ * possible label value is either snake case or camelCase
+ */
+
+export function getLabel(
+  labelOptions: string | Record<string, string>,
+  fallback: string,
+  locale = "en",
+) {
+  const label =
+    typeof labelOptions === "string"
+      ? labelOptions
+      : labelOptions[locale] || fallback;
+  return label.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
+}
+
+export function parseErrorMessage(
+  message: string,
+  variables?: Record<string, any>,
+) {
+  return message.replace(/{{(\w+)}}/g, (match, key) => {
+    return variables?.[key] || match;
+  });
+}
+
+function getMessageField({
+  message,
+  errorMessage,
+  locale = "en",
+  type,
+}: MessageFieldOptions) {
+  if (!errorMessage) {
+    return message;
+  }
+
+  const messageType = ERROR_TYPE_KEYS[type];
+  const messageField = errorMessage[messageType];
+  if (!messageField) {
+    return message;
+  }
+
+  if (typeof messageField === "string") {
+    return messageField;
+  }
+
+  return messageField[locale] || message;
+}
+
+/**
+ * Format the errors from ValueError by checking schema.errorMessage
+ * noted that this is only worked for inline errorMessage, not worked for messages that imported from locales
+ */
+export function formatErrors(
+  errors: ValueError[],
+  options?: FormatErrorOptions,
+) {
+  const locale = options?.locale || "en";
   return errors.reduce((acc, error) => {
-    const field = error.path.replace(/^\//, "").replace(/\//g, ".");
-    const pathExist = acc.find((err) => err.field === field);
+    const pathExist = acc.find((err) => err.path === error.path);
 
     if (!pathExist) {
-      const message = formatErrorMessage(error);
-      acc.push({
-        field,
-        path: error.path,
-        message,
+      const messageField = getMessageField({
+        message: error.message,
+        errorMessage: error.schema.errorMessage,
+        locale,
         type: error.type,
+      });
+      const label = getLabel(
+        error.schema.label || getFieldPath(error.path),
+        getFieldPath(error.path),
+        locale,
+      );
+      acc.push({
+        ...error,
+        message: parseErrorMessage(messageField, {
+          label,
+          ...error.schema,
+        }),
       });
     }
     return acc;
-  }, [] as ErrorMessage[]);
+  }, [] as ValueError[]);
 }
