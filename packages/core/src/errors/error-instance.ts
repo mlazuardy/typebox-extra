@@ -4,19 +4,26 @@ import {
   SetErrorFunction,
   ValueErrorType,
 } from "@sinclair/typebox/errors";
-import {
-  ERROR_TYPE_KEYS,
-  getLabel,
-  getProperty,
-  parseErrorMessage,
-} from "../utils";
 import { Kind } from "@sinclair/typebox";
+import { getProperty } from "../utils";
 
 interface SetupOptions {
   messages: Record<string, any>;
   defaultLocale?: string;
   fallbackLocale?: string;
 }
+
+export const ERROR_TYPE_KEYS = {
+  [ValueErrorType.ObjectRequiredProperty]: "required",
+  [ValueErrorType.String]: "invalid",
+  [ValueErrorType.StringMinLength]: "minLength",
+  [ValueErrorType.StringMaxLength]: "maxLength",
+  [ValueErrorType.Union]: "invalid",
+  [ValueErrorType.Array]: "invalid",
+  [ValueErrorType.ArrayMinItems]: "minItems",
+  [ValueErrorType.ArrayMaxItems]: "maxItems",
+  [ValueErrorType.StringFormat]: "format",
+};
 
 export class ErrorInstance {
   static isLoad = false;
@@ -26,6 +33,43 @@ export class ErrorInstance {
 
   static setLocale(locale: string) {
     this.locale = locale;
+  }
+
+  static pathToDot(path: string) {
+    return path.replace(/^\//, "").replace(/\//g, ".");
+  }
+
+  static getLastPath(path: string) {
+    return path.split("/").slice(-1)[0];
+  }
+
+  /**
+   * Create function to beautify label format
+   * possible label value is either snake case or camelCase
+   */
+
+  static getLabel(
+    path: string,
+    labelOptions?: string | Record<string, string>,
+    locale = "en",
+  ) {
+    let label = path;
+    if (!labelOptions) {
+      label = this.getLastPath(path);
+    } else {
+      label =
+        typeof labelOptions === "string"
+          ? labelOptions
+          : labelOptions[locale] || this.getLastPath(path);
+    }
+
+    return label.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
+  }
+
+  static parseErrorMessage(message: string, variables?: Record<string, any>) {
+    return message.replace(/{{(\w+)}}/g, (match, key) => {
+      return variables?.[key] || match;
+    });
   }
 
   static get localeMessage() {
@@ -76,7 +120,11 @@ export class ErrorInstance {
       }
 
       SetErrorFunction((error) => {
-        const label = getLabel(error.path, error.schema.label, this.locale);
+        const label = this.getLabel(
+          error.path,
+          error.schema.label,
+          this.locale,
+        );
         const type = ERROR_TYPE_KEYS[error.errorType];
 
         const variables = {
@@ -85,7 +133,7 @@ export class ErrorInstance {
         };
 
         if (error.errorType === ValueErrorType.ObjectRequiredProperty) {
-          return parseErrorMessage(localeMessage.required, variables);
+          return this.parseErrorMessage(localeMessage.required, variables);
         }
 
         if (!type) {
@@ -95,7 +143,7 @@ export class ErrorInstance {
         const key = this.getErrorKey(error, type);
         return !key
           ? this.getFallbackMessage(error)
-          : parseErrorMessage(key, variables);
+          : this.parseErrorMessage(key, variables);
       });
 
       this.isLoad = true;
