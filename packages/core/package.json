@@ -3,6 +3,7 @@
   "description": "Core package for typebox-extra",
   "license": "MIT",
   "version": "0.1.0",
+  "keywords": ["typebox", "typebox-extra", "typebox-i18n", "typebox custom messages"],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
