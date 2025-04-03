@@ -1,14 +1,10 @@
 import { Value } from "@sinclair/typebox/value";
 import { afterAll, describe, expect, it } from "vitest";
 import { t } from "../../type-system";
+import { loadErrorStorage } from "../error-storage-load";
 import { ErrorStorage } from "../../error-storage";
-import en from "../../locales/en.json";
-import id from "../../locales/id.json";
 
-ErrorStorage.load({
-  messages: { en, id },
-  defaultLocale: "en",
-});
+loadErrorStorage();
 
 describe("string default locale", () => {
   const schema = t.Object({
