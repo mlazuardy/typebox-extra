@@ -4,3 +4,4 @@ eslint.config.mjs
 tsup.config.ts
 vitest.config.ts
 tsconfig.json
+coverage
