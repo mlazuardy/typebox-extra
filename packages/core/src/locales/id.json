@@ -9,12 +9,17 @@
   "number": {
     "invalid": "{{label}} harus berupa angka.",
     "minimum": "{{label}} harus memiliki nilai minimal {{minimum}}.",
-    "maximum": "{{label}} harus memiliki nilai maksimal {{maximum}}."
+    "maximum": "{{label}} harus memiliki nilai maksimal {{maximum}}.",
+    "exclusiveMinimum": "{{label}} harus lebih besar dari {{exclusiveMinimum}}.",
+    "exclusiveMaximum": "{{label}} harus lebih kecil dari {{exclusiveMaximum}}."
   },
   "array": {
     "invalid": "{{label}} harus berupa array.",
     "minItems": "{{label}} harus memiliki setidaknya {{minItems}} item.",
     "maxItems": "{{label}} harus memiliki paling banyak {{maxItems}} item."
+  },
+  "boolean": {
+    "invalid": "{{label}} harus berupa boolean."
   },
   "format": {
     "email": "{{label}} harus berupa email yang valid."
