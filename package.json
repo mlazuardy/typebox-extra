@@ -8,8 +8,7 @@
   },
   "keywords": ["typebox", "typebox-extra"],
   "author": "Michael Lazuardy",
-  "license": "ISC",
-  "packageManager": "pnpm@10.6.2",
+  "license": "MIT",
   "pnpm": {
     "neverBuiltDependencies": []
   },

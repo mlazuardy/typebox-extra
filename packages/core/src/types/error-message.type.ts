@@ -1,8 +1,6 @@
-export type ErrorMessageSchemaOptions = Record<string, string>;
+export type ErrorMessageTypeOptions = string | Record<string, string>;
+export type ErrorMessageSchemaOptions = Record<string, ErrorMessageTypeOptions>;
 
-export interface ErrorMessage {
-  field: string;
-  message: string;
-  type: number;
-  path: string;
+export interface FormatErrorOptions {
+  locale?: string;
 }

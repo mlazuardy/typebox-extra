@@ -1,11 +1,10 @@
 import eslint from "@eslint/js";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import tseslint from "typescript-eslint";
+import { globalIgnores } from "eslint/config";
 
 export default tseslint.config(
-  {
-    ignores: ["eslint.config.mjs"],
-  },
+  globalIgnores(["eslint.config.mjs", "dist/**/*", "node_modules/*"]),
   eslint.configs.recommended,
   tseslint.configs.recommended,
   prettierRecommended,

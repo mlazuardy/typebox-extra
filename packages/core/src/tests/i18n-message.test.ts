@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { t } from "../type-system";
 import { Value } from "@sinclair/typebox/value";
 
-describe("email-format", () => {
+describe("i18n message", () => {
   const validEmail = "b1m0G@example.com";
   const invalidEmail = "invalid-email";
 
