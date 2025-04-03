@@ -3,6 +3,7 @@ import {
   DefaultErrorFunction,
   ValueErrorType,
   ErrorFunctionParameter,
+  ValueError,
 } from "@sinclair/typebox/errors";
 
 import { getProperty } from "./utils";
@@ -13,21 +14,26 @@ interface LoadOptions {
   messages: Record<string, any>;
 }
 
-interface ErrorKeyReturn {
-  errorKey: string;
-  error?: ErrorFunctionParameter;
-}
-
 export const ERROR_TYPE_KEYS = {
   [ValueErrorType.ObjectRequiredProperty]: "required",
   [ValueErrorType.String]: "invalid",
   [ValueErrorType.StringMinLength]: "minLength",
   [ValueErrorType.StringMaxLength]: "maxLength",
+
   [ValueErrorType.Union]: "invalid",
+
   [ValueErrorType.Array]: "invalid",
   [ValueErrorType.ArrayMinItems]: "minItems",
   [ValueErrorType.ArrayMaxItems]: "maxItems",
   [ValueErrorType.StringFormat]: "format",
+
+  [ValueErrorType.Number]: "invalid",
+  [ValueErrorType.NumberMinimum]: "minimum",
+  [ValueErrorType.NumberMaximum]: "maximum",
+  [ValueErrorType.NumberExclusiveMinimum]: "exclusiveMinimum",
+  [ValueErrorType.NumberExclusiveMaximum]: "exclusiveMaximum",
+
+  [ValueErrorType.Boolean]: "invalid",
 };
 
 /**
@@ -63,13 +69,12 @@ export class ErrorStorage {
     }
   }
 
-  static getMessage(error: ErrorFunctionParameter, key: string) {
+  static getMessage(error: ErrorFunctionParameter) {
+    const { errorKey: key, prefix } = this.getErrorKey(error);
     if (!error.schema.errorMessage) {
       return getProperty(this.localeMessage, key);
     }
-    const localKey = !error.schema.type
-      ? key
-      : key.replace(`${error.schema.type}.`, "");
+    const localKey = !prefix ? key : key.replace(`${prefix}.`, "");
     const inlineMessage = error.schema.errorMessage?.[localKey];
 
     if (inlineMessage) {
@@ -87,15 +92,21 @@ export class ErrorStorage {
   }
 
   static formatError(error: ErrorFunctionParameter) {
-    const { errorKey, error: childError } = this.getErrorKey(error);
+    const { error: childError } = this.getErrorKey(error);
     const finalError = childError || error;
-    const message =
-      this.getMessage(finalError, errorKey) || this.localeMessage.invalid;
+    const message = this.getMessage(finalError) || this.localeMessage.invalid;
 
     return this.formatMessage(message, {
       ...finalError.schema,
       label: this.getLabel(finalError.path, finalError.schema.label),
     });
+  }
+
+  static format(errors: ValueError[]) {
+    return errors.map((error) => ({
+      field: error.path.replace(/^\//, "").replace(/\//g, "."),
+      message: error.message,
+    }));
   }
 
   static formatMessage(template: string, variables?: Record<string, any>) {
@@ -135,7 +146,7 @@ export class ErrorStorage {
       .toLowerCase();
   }
 
-  static getErrorKey(error: ErrorFunctionParameter): ErrorKeyReturn {
+  static getErrorKey(error: ErrorFunctionParameter) {
     let childError: ErrorFunctionParameter | undefined;
     const type = error.errorType;
 
@@ -147,10 +158,22 @@ export class ErrorStorage {
     }
 
     let key = ERROR_TYPE_KEYS[type];
+    let prefix: string | undefined = undefined;
+
+    if (!key) {
+      // when custom key path is not defined, fallback to typebox enum value type with prefix `types`
+      key = `types.${type}`;
+      prefix = `types`;
+      console.log({ key, prefix });
+      return { errorKey: key, error: childError, prefix };
+    }
 
     if (error.schema.type) {
-      key = `${error.schema.type}.${key}`;
+      const format =
+        error.schema.type === "string" ? error.schema.format : undefined;
+      key = !format ? `${error.schema.type}.${key}` : `format.${format}`;
+      prefix = !format ? error.schema.type : "format";
     }
-    return { errorKey: key, error: childError };
+    return { errorKey: key, error: childError, prefix };
   }
 }
