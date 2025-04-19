@@ -119,7 +119,7 @@ export class ErrorStorage {
     const keys = Object.keys(variables);
 
     keys.forEach((key) => {
-      message = message.replaceAll(`{{${key}}}`, String(variables[key]));
+      message = message.replaceAll(`{${key}}`, String(variables[key]));
     });
 
     return message;
