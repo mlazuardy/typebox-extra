@@ -11,7 +11,7 @@ describe("string default locale", () => {
     firstName: t.String({
       minLength: 3,
       errorMessage: {
-        required: "{{label}} cannot be empty",
+        required: "{label} cannot be empty",
       },
     }),
     lastName: t.String({

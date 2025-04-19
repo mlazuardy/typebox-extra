@@ -13,7 +13,7 @@ describe("number", () => {
       minimum: 0,
       maximum: 100,
       errorMessage: {
-        maximum: "{{label}} must be at most {{maximum}}%",
+        maximum: "{label} must be at most {maximum}%",
       },
     }),
   });
