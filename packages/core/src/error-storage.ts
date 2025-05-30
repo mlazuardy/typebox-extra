@@ -164,7 +164,6 @@ export class ErrorStorage {
       // when custom key path is not defined, fallback to typebox enum value type with prefix `types`
       key = `types.${type}`;
       prefix = `types`;
-      console.log({ key, prefix });
       return { errorKey: key, error: childError, prefix };
     }
 
