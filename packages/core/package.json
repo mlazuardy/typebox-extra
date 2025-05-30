@@ -2,7 +2,7 @@
   "name": "@typeb/core",
   "description": "Core package for typebox-extra",
   "license": "MIT",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Michael Lazuardy",
   "keywords": [
     "typebox",
