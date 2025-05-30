@@ -6,13 +6,17 @@
     "build": "nx run-many --target=build --no-cloud",
     "test": "nx run-many --target=test --no-cloud"
   },
-  "keywords": ["typebox", "typebox-extra"],
+  "keywords": [
+    "typebox",
+    "typebox-extra"
+  ],
   "author": "Michael Lazuardy",
   "license": "MIT",
   "pnpm": {
     "neverBuiltDependencies": []
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.4",
     "nx": "^20.6.2",
     "nx-cloud": "^19.1.0"
   }
