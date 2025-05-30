@@ -21,8 +21,8 @@ describe("complex object", () => {
     ...Value.Errors(schema, {
       name: "Michael Lazuardy",
       ownership: {
-        price: 0,
-        features: [""],
+        price: 1,
+        features: ["test"],
       },
     }),
   ];
